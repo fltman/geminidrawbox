@@ -11,7 +11,7 @@ import { Menu, X } from "lucide-react";
 
 export default function DrawingPage() {
   const isMobile = useIsMobile();
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMobileControls, setShowMobileControls] = useState(false);
   const drawing = useDrawing();
 
   return (
@@ -59,10 +59,10 @@ export default function DrawingPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                onClick={() => setShowMobileControls(!showMobileControls)}
                 data-testid="button-mobile-menu"
               >
-                {showMobileMenu ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                {showMobileControls ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </Button>
             </div>
 
@@ -108,9 +108,20 @@ export default function DrawingPage() {
             </div>
 
             {/* Mobile Menu Overlay */}
-            {showMobileMenu && (
-              <div className="absolute top-full left-0 right-0 bg-card border-b border-border shadow-lg max-h-96 overflow-y-auto">
+            {showMobileControls && (
+              <div className="absolute top-full left-0 right-0 bg-card border-b border-border shadow-lg max-h-96 overflow-y-auto z-40">
                 <div className="p-4 space-y-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium">Verktyg</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowMobileControls(false)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
                   <BrushControls
                     brushSize={drawing.brushSize}
                     brushOpacity={drawing.brushOpacity}
@@ -121,6 +132,30 @@ export default function DrawingPage() {
                     currentColor={drawing.currentColor}
                     onColorChange={drawing.setCurrentColor}
                   />
+
+                  {/* Mobile Action Buttons */}
+                  <div className="flex gap-2 pt-3 border-t border-border">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={drawing.undo}
+                      disabled={!drawing.canUndo}
+                      className="flex-1"
+                      data-testid="button-mobile-undo"
+                    >
+                      Ångra
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={drawing.redo}
+                      disabled={!drawing.canRedo}
+                      className="flex-1"
+                      data-testid="button-mobile-redo"
+                    >
+                      Gör om
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -129,7 +164,7 @@ export default function DrawingPage() {
       )}
 
       {/* Canvas Container */}
-      <div className={`flex-1 flex flex-col ${isMobile ? 'mt-32' : ''}`}>
+      <div className={`flex-1 flex flex-col ${isMobile ? 'pt-32' : ''} relative`}>
         {/* Canvas Header */}
         {!isMobile && (
           <div className="flex items-center justify-between p-6 bg-card border-b border-border">
@@ -144,8 +179,8 @@ export default function DrawingPage() {
         )}
 
         {/* Drawing Canvas */}
-        <div className="flex-1 p-6 bg-muted/30 overflow-auto">
-          <div className="max-w-full max-h-full flex items-center justify-center">
+        <div className={`flex-1 bg-muted/30 overflow-hidden ${isMobile ? 'p-2' : 'p-6'}`}>
+          <div className="w-full h-full flex items-center justify-center">
             <DrawingCanvas
               brushSize={drawing.brushSize}
               brushOpacity={drawing.brushOpacity}
@@ -154,6 +189,15 @@ export default function DrawingPage() {
               onMousePosition={drawing.setMousePosition}
             />
           </div>
+
+          {/* Mobile stroke counter */}
+          {isMobile && (
+            <div className="absolute bottom-4 right-4 bg-card/80 backdrop-blur-sm rounded-md px-2 py-1 text-xs text-muted-foreground shadow-sm">
+              <span data-testid="text-mobile-stroke-count">
+                {drawing.strokeCount} drag
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Canvas Footer */}

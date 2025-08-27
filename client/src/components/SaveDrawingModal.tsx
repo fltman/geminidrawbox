@@ -56,7 +56,7 @@ export default function SaveDrawingModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[95vw] max-w-md">
         <DialogHeader>
           <DialogTitle>Spara ritning</DialogTitle>
           <DialogDescription>
