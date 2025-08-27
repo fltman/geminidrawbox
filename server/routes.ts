@@ -114,6 +114,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Upload the generated image to object storage
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       
+      console.log("Uploading generated image:", result.imageData.length, "bytes to:", uploadURL);
+      
       const uploadResponse = await fetch(uploadURL, {
         method: "PUT",
         body: result.imageData,
@@ -123,11 +125,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!uploadResponse.ok) {
-        throw new Error("Failed to upload generated image");
+        console.error("Upload failed with status:", uploadResponse.status, uploadResponse.statusText);
+        const errorText = await uploadResponse.text();
+        console.error("Upload error details:", errorText);
+        throw new Error(`Failed to upload generated image: ${uploadResponse.status} ${uploadResponse.statusText}`);
       }
+
+      console.log("Upload successful, response status:", uploadResponse.status);
 
       // Update the drawing with the generated image path
       const generatedImagePath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+      console.log("Normalized path for generated image:", generatedImagePath);
       await storage.updateDrawingGeneratedImage(id, generatedImagePath);
 
       res.json({ 
@@ -142,6 +150,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: "Failed to generate image",
         details: error instanceof Error ? error.message : "Unknown error"
       });
+    }
+  });
+
+  // Endpoint for serving private objects (like generated images)
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      console.log("Serving object:", req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving object:", req.path, error);
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
     }
   });
 
