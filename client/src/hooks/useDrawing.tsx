@@ -258,6 +258,12 @@ export function useDrawing() {
 
       // If prompt is provided, generate AI image
       if (prompt && savedDrawing.id) {
+        // Show the progress modal immediately
+        setState(prev => ({
+          ...prev,
+          showGeneratedImage: true,
+        }));
+        
         try {
           await generateImageMutation.mutateAsync({
             drawingId: savedDrawing.id,
@@ -265,7 +271,11 @@ export function useDrawing() {
           });
         } catch (genError) {
           console.error("AI generation error:", genError);
-          // Don't fail the entire save process if AI generation fails
+          // Close modal on error
+          setState(prev => ({
+            ...prev,
+            showGeneratedImage: false,
+          }));
         }
       } else if (!prompt) {
         // If no AI generation, still show success
