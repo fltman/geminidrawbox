@@ -53,7 +53,7 @@ export default function DrawingPage() {
         <>
           <div className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border">
             <div className="flex items-center justify-between p-4">
-              <h1 className="text-lg font-semibold">Digital Rityta</h1>
+              <div className="w-10"></div>
               <Button
                 variant="outline"
                 size="sm"
@@ -73,15 +73,6 @@ export default function DrawingPage() {
                 className="w-10 h-10 rounded border-2 border-border cursor-pointer flex-shrink-0"
                 data-testid="input-mobile-color"
               />
-              <input
-                type="range"
-                min="1"
-                max="50"
-                value={drawing.brushSize}
-                onChange={(e) => drawing.setBrushSize(Number(e.target.value))}
-                className="flex-1 min-w-20"
-                data-testid="input-mobile-brush-size"
-              />
               <Button
                 variant="outline"
                 size="sm"
@@ -89,7 +80,7 @@ export default function DrawingPage() {
                 className="flex-shrink-0"
                 data-testid="button-mobile-clear"
               >
-                Rensa
+                Clear
               </Button>
               <Button
                 size="sm"
@@ -99,7 +90,7 @@ export default function DrawingPage() {
                 data-testid="button-mobile-save"
               >
                 <Sparkles className="w-3 h-3 mr-1" />
-                {drawing.isSaving ? "Sparar..." : "AI"}
+                {drawing.isSaving ? "Generating..." : "AI"}
               </Button>
             </div>
 
@@ -107,16 +98,14 @@ export default function DrawingPage() {
             {showMobileControls && (
               <div className="absolute top-full left-0 right-0 bg-card border-b border-border shadow-lg max-h-96 overflow-y-auto z-40">
                 <div className="p-4 space-y-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">Verktyg</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setShowMobileControls(false)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowMobileControls(false)}
+                    className="ml-auto"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
                   
                   <BrushControls
                     brushSize={drawing.brushSize}
@@ -128,30 +117,6 @@ export default function DrawingPage() {
                     currentColor={drawing.currentColor}
                     onColorChange={drawing.setCurrentColor}
                   />
-
-                  {/* Mobile Action Buttons */}
-                  <div className="flex gap-2 pt-3 border-t border-border">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={drawing.undo}
-                      disabled={!drawing.canUndo}
-                      className="flex-1"
-                      data-testid="button-mobile-undo"
-                    >
-                      Ångra
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={drawing.redo}
-                      disabled={!drawing.canRedo}
-                      className="flex-1"
-                      data-testid="button-mobile-redo"
-                    >
-                      Gör om
-                    </Button>
-                  </div>
                 </div>
               </div>
             )}
