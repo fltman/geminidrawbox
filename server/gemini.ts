@@ -57,20 +57,22 @@ export async function generateImageFromDrawing(
         }
       }
 
-      // Check for image data in response - Gemini 2.5 Flash Image returns base64 data
+      // Check for image data in response - from the actual logged structure
       if (response.choices && response.choices[0].message.content) {
         const content = response.choices[0].message.content;
         
-        // Check if content is an array with image parts (multimodal response)
+        // Gemini returns content as array with text and image parts
         if (Array.isArray(content)) {
           for (const part of content) {
+            console.log("Checking part with keys:", Object.keys(part));
+            
+            // Check for image_url part (standard OpenAI format)
             if (part.type === "image_url" && part.image_url && part.image_url.url) {
-              // Extract base64 image data from data URL
               const dataUrl = part.image_url.url;
               if (dataUrl.startsWith("data:image/")) {
                 const base64Data = dataUrl.split(',')[1];
                 const imageBuffer = Buffer.from(base64Data, "base64");
-                console.log("Found base64 image in multimodal response, size:", imageBuffer.length, "bytes");
+                console.log("Found base64 image in image_url part, size:", imageBuffer.length, "bytes");
                 
                 return {
                   success: true,
@@ -78,23 +80,47 @@ export async function generateImageFromDrawing(
                 };
               }
             }
-          }
-        }
-        
-        // Check if content is a string containing base64 image data
-        if (typeof content === "string") {
-          // Look for base64 image data in the content string
-          const base64Regex = /data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/g;
-          const base64Match = base64Regex.exec(content);
-          
-          if (base64Match && base64Match[1]) {
-            const imageBuffer = Buffer.from(base64Match[1], "base64");
-            console.log("Found base64 image in string content, size:", imageBuffer.length, "bytes");
             
-            return {
-              success: true,
-              imageData: imageBuffer,
-            };
+            // Check for direct image part (Gemini specific)
+            if (part.type === "image" && part.image) {
+              let base64Data = part.image;
+              // Remove data URL prefix if present
+              if (base64Data.includes(',')) {
+                base64Data = base64Data.split(',')[1];
+              }
+              const imageBuffer = Buffer.from(base64Data, "base64");
+              console.log("Found base64 image in image part, size:", imageBuffer.length, "bytes");
+              
+              return {
+                success: true,
+                imageData: imageBuffer,
+              };
+            }
+            
+            // Check for any field containing base64 data
+            Object.keys(part).forEach(key => {
+              if (typeof part[key] === "string" && part[key].length > 1000 && 
+                  (part[key].startsWith("data:image/") || /^[A-Za-z0-9+/=]{100,}$/.test(part[key]))) {
+                console.log(`Found potential base64 data in field '${key}', length:`, part[key].length);
+                
+                let base64Data = part[key];
+                if (base64Data.startsWith("data:image/")) {
+                  base64Data = base64Data.split(',')[1];
+                }
+                
+                try {
+                  const imageBuffer = Buffer.from(base64Data, "base64");
+                  console.log("Successfully decoded base64 from field", key, "size:", imageBuffer.length, "bytes");
+                  
+                  return {
+                    success: true,
+                    imageData: imageBuffer,
+                  };
+                } catch (e) {
+                  console.log("Failed to decode base64 from field", key);
+                }
+              }
+            });
           }
         }
         
