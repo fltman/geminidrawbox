@@ -97,30 +97,53 @@ export async function generateImageFromDrawing(
               };
             }
             
-            // Check for any field containing base64 data
-            Object.keys(part).forEach(key => {
-              if (typeof part[key] === "string" && part[key].length > 1000 && 
-                  (part[key].startsWith("data:image/") || /^[A-Za-z0-9+/=]{100,}$/.test(part[key]))) {
-                console.log(`Found potential base64 data in field '${key}', length:`, part[key].length);
-                
-                let base64Data = part[key];
-                if (base64Data.startsWith("data:image/")) {
-                  base64Data = base64Data.split(',')[1];
-                }
-                
-                try {
-                  const imageBuffer = Buffer.from(base64Data, "base64");
-                  console.log("Successfully decoded base64 from field", key, "size:", imageBuffer.length, "bytes");
+            // Check for any field containing base64 data - including nested objects
+            const checkForBase64 = (obj: any, path: string = '') => {
+              if (typeof obj === "string" && obj.length > 1000) {
+                if (obj.startsWith("data:image/")) {
+                  console.log(`Found data URL in ${path}, length:`, obj.length);
+                  const base64Data = obj.split(',')[1];
                   
-                  return {
-                    success: true,
-                    imageData: imageBuffer,
-                  };
-                } catch (e) {
-                  console.log("Failed to decode base64 from field", key);
+                  try {
+                    const imageBuffer = Buffer.from(base64Data, "base64");
+                    console.log("Successfully decoded base64 from", path, "size:", imageBuffer.length, "bytes");
+                    
+                    return {
+                      success: true,
+                      imageData: imageBuffer,
+                    };
+                  } catch (e) {
+                    console.log("Failed to decode base64 from", path);
+                  }
+                } else if (/^[A-Za-z0-9+/=]{100,}$/.test(obj)) {
+                  console.log(`Found potential raw base64 in ${path}, length:`, obj.length);
+                  try {
+                    const imageBuffer = Buffer.from(obj, "base64");
+                    console.log("Successfully decoded raw base64 from", path, "size:", imageBuffer.length, "bytes");
+                    
+                    return {
+                      success: true,
+                      imageData: imageBuffer,
+                    };
+                  } catch (e) {
+                    console.log("Failed to decode raw base64 from", path);
+                  }
+                }
+              } else if (typeof obj === "object" && obj !== null) {
+                for (const [key, value] of Object.entries(obj)) {
+                  const result = checkForBase64(value, path ? `${path}.${key}` : key);
+                  if (result && result.success) {
+                    return result;
+                  }
                 }
               }
-            });
+              return null;
+            };
+            
+            const result = checkForBase64(part, `part[${content.indexOf(part)}]`);
+            if (result && result.success) {
+              return result;
+            }
           }
         }
         
