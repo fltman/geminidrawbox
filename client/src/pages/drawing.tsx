@@ -5,13 +5,15 @@ import ColorPicker from "@/components/ColorPicker";
 import BrushControls from "@/components/BrushControls";
 import DrawingActions from "@/components/DrawingActions";
 import GeneratedImageModal from "@/components/GeneratedImageModal";
+import SaveDrawingModal from "@/components/SaveDrawingModal";
 import { useDrawing } from "@/hooks/useDrawing";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 
 export default function DrawingPage() {
   const isMobile = useIsMobile();
   const [showMobileControls, setShowMobileControls] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const drawing = useDrawing();
 
   return (
@@ -43,7 +45,10 @@ export default function DrawingPage() {
           onClear={drawing.clearCanvas}
           onUndo={drawing.undo}
           onRedo={drawing.redo}
-          onSave={drawing.saveDrawing}
+          onSave={(title: string, prompt?: string) => {
+            drawing.saveDrawing(title, prompt);
+            setShowSaveModal(false);
+          }}
           canUndo={drawing.canUndo}
           canRedo={drawing.canRedo}
           isSaving={drawing.isSaving}
@@ -95,15 +100,13 @@ export default function DrawingPage() {
               </Button>
               <Button
                 size="sm"
-                onClick={() => {
-                  const title = `Ritning ${new Date().toLocaleDateString("sv-SE")} ${new Date().toLocaleTimeString("sv-SE")}`;
-                  drawing.saveDrawing(title);
-                }}
+                onClick={() => setShowSaveModal(true)}
                 disabled={drawing.isSaving}
-                className="flex-shrink-0"
+                className="flex-shrink-0 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                 data-testid="button-mobile-save"
               >
-                {drawing.isSaving ? "Sparar..." : "Spara"}
+                <Sparkles className="w-3 h-3 mr-1" />
+                {drawing.isSaving ? "Sparar..." : "AI"}
               </Button>
             </div>
 
@@ -219,6 +222,17 @@ export default function DrawingPage() {
           </div>
         )}
       </div>
+
+      {/* Save Drawing Modal */}
+      <SaveDrawingModal
+        open={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={(title: string, prompt?: string) => {
+          drawing.saveDrawing(title, prompt);
+          setShowSaveModal(false);
+        }}
+        isSaving={drawing.isSaving}
+      />
 
       {/* Generated Image Modal */}
       <GeneratedImageModal
