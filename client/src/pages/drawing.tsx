@@ -8,7 +8,7 @@ import GeneratedImageModal from "@/components/GeneratedImageModal";
 import SaveDrawingModal from "@/components/SaveDrawingModal";
 import { useDrawing } from "@/hooks/useDrawing";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, Wrench } from "lucide-react";
 
 export default function DrawingPage() {
   const isMobile = useIsMobile();
@@ -60,19 +60,12 @@ export default function DrawingPage() {
                 onClick={() => setShowMobileControls(!showMobileControls)}
                 data-testid="button-mobile-menu"
               >
-                {showMobileControls ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                {showMobileControls ? <X className="w-4 h-4" /> : <Wrench className="w-4 h-4" />}
               </Button>
             </div>
 
             {/* Mobile Quick Tools */}
             <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto">
-              <input
-                type="color"
-                value={drawing.currentColor}
-                onChange={(e) => drawing.setCurrentColor(e.target.value)}
-                className="w-10 h-10 rounded border-2 border-border cursor-pointer flex-shrink-0"
-                data-testid="input-mobile-color"
-              />
               <Button
                 variant="outline"
                 size="sm"
