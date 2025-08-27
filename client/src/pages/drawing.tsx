@@ -179,8 +179,8 @@ export default function DrawingPage() {
         )}
 
         {/* Drawing Canvas */}
-        <div className={`flex-1 bg-muted/30 overflow-hidden ${isMobile ? 'p-2' : 'p-6'}`}>
-          <div className="w-full h-full flex items-center justify-center">
+        <div className={`flex-1 bg-muted/30 overflow-auto ${isMobile ? 'p-4' : 'p-12'}`}>
+          <div className="w-full h-full flex items-center justify-center min-h-[800px]">
             <DrawingCanvas
               brushSize={drawing.brushSize}
               brushOpacity={drawing.brushOpacity}

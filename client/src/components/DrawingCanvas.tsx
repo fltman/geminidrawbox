@@ -103,22 +103,42 @@ export default function DrawingCanvas({
   };
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={1200}
-      height={800}
-      className="drawing-canvas rounded-lg max-w-full max-h-full cursor-crosshair bg-white shadow-lg"
-      onMouseDown={startDrawing}
-      onMouseMove={handleMouseMove}
-      onMouseUp={stopDrawing}
-      onMouseLeave={stopDrawing}
-      onTouchStart={startDrawing}
-      onTouchMove={draw}
-      onTouchEnd={stopDrawing}
-      data-testid="canvas-drawing"
-      style={{ touchAction: 'none' }}
-    >
-      Din webbläsare stöder inte HTML5 Canvas.
-    </canvas>
+    <div className="relative">
+      {/* Canvas Border and Info */}
+      <div className="absolute -top-8 left-0 right-0 flex justify-between items-center text-xs text-muted-foreground px-2 hidden sm:flex">
+        <span>Ritruta</span>
+        <span>1200 × 800 px</span>
+      </div>
+      
+      {/* Canvas with Enhanced Border */}
+      <canvas
+        ref={canvasRef}
+        width={1200}
+        height={800}
+        className="drawing-canvas rounded-lg max-w-full max-h-full cursor-crosshair bg-white shadow-xl border-4 border-slate-400 dark:border-slate-500 transition-all duration-200 hover:shadow-2xl"
+        onMouseDown={startDrawing}
+        onMouseMove={handleMouseMove}
+        onMouseUp={stopDrawing}
+        onMouseLeave={stopDrawing}
+        onTouchStart={startDrawing}
+        onTouchMove={draw}
+        onTouchEnd={stopDrawing}
+        data-testid="canvas-drawing"
+        style={{ 
+          touchAction: 'none',
+          boxShadow: '0 0 0 1px rgba(0,0,0,0.1), 0 8px 32px rgba(0,0,0,0.1)'
+        }}
+      >
+        Din webbläsare stöder inte HTML5 Canvas.
+      </canvas>
+      
+      {/* Corner Size Indicators - Hidden on mobile */}
+      <div className="absolute -bottom-6 left-0 text-xs text-muted-foreground hidden sm:block">
+        Bredd: 1200px
+      </div>
+      <div className="absolute -right-16 bottom-0 text-xs text-muted-foreground transform rotate-90 origin-bottom-left hidden sm:block">
+        Höjd: 800px
+      </div>
+    </div>
   );
 }
