@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DrawingCanvasProps {
   brushSize: number;
@@ -18,6 +19,27 @@ export default function DrawingCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 800, height: 500 });
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      if (isMobile) {
+        // On mobile, use full viewport
+        setCanvasDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
+      } else {
+        // On desktop, use fixed size
+        setCanvasDimensions({ width: 800, height: 500 });
+      }
+    };
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    return () => window.removeEventListener('resize', updateCanvasSize);
+  }, [isMobile]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -103,19 +125,25 @@ export default function DrawingCanvas({
   };
 
   return (
-    <div className="relative">
-      {/* Canvas Border and Info */}
-      <div className="absolute -top-8 left-0 right-0 flex justify-between items-center text-xs text-muted-foreground px-2 hidden sm:flex">
-        <span>Ritruta</span>
-        <span>800 × 500 px</span>
-      </div>
+    <div className={`relative ${isMobile ? 'fixed inset-0' : ''}`}>
+      {/* Canvas Border and Info - Desktop only */}
+      {!isMobile && (
+        <div className="absolute -top-8 left-0 right-0 flex justify-between items-center text-xs text-muted-foreground px-2">
+          <span>Canvas</span>
+          <span>{canvasDimensions.width} × {canvasDimensions.height} px</span>
+        </div>
+      )}
       
-      {/* Canvas with Enhanced Border */}
+      {/* Canvas */}
       <canvas
         ref={canvasRef}
-        width={800}
-        height={500}
-        className="drawing-canvas rounded-lg max-w-full max-h-full cursor-crosshair bg-white shadow-xl border-4 border-slate-400 dark:border-slate-500 transition-all duration-200 hover:shadow-2xl"
+        width={canvasDimensions.width}
+        height={canvasDimensions.height}
+        className={`drawing-canvas cursor-crosshair bg-white transition-all duration-200 ${
+          isMobile 
+            ? 'w-full h-full block' 
+            : 'rounded-lg max-w-full max-h-full shadow-xl border-4 border-slate-400 dark:border-slate-500 hover:shadow-2xl'
+        }`}
         onMouseDown={startDrawing}
         onMouseMove={handleMouseMove}
         onMouseUp={stopDrawing}
@@ -126,19 +154,23 @@ export default function DrawingCanvas({
         data-testid="canvas-drawing"
         style={{ 
           touchAction: 'none',
-          boxShadow: '0 0 0 1px rgba(0,0,0,0.1), 0 8px 32px rgba(0,0,0,0.1)'
+          ...(isMobile ? {} : { boxShadow: '0 0 0 1px rgba(0,0,0,0.1), 0 8px 32px rgba(0,0,0,0.1)' })
         }}
       >
-        Din webbläsare stöder inte HTML5 Canvas.
+        Your browser does not support HTML5 Canvas.
       </canvas>
       
-      {/* Corner Size Indicators - Hidden on mobile */}
-      <div className="absolute -bottom-6 left-0 text-xs text-muted-foreground hidden sm:block">
-        Bredd: 800px
-      </div>
-      <div className="absolute -right-16 bottom-0 text-xs text-muted-foreground transform rotate-90 origin-bottom-left hidden sm:block">
-        Höjd: 500px
-      </div>
+      {/* Corner Size Indicators - Desktop only */}
+      {!isMobile && (
+        <>
+          <div className="absolute -bottom-6 left-0 text-xs text-muted-foreground">
+            Width: {canvasDimensions.width}px
+          </div>
+          <div className="absolute -right-16 bottom-0 text-xs text-muted-foreground transform rotate-90 origin-bottom-left">
+            Height: {canvasDimensions.height}px
+          </div>
+        </>
+      )}
     </div>
   );
 }

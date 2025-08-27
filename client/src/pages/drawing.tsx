@@ -123,8 +123,8 @@ export default function DrawingPage() {
       )}
 
       {/* Canvas Container */}
-      <div className="flex-1 flex flex-col relative">
-        {/* Canvas Header - Minimized */}
+      <div className={`${isMobile ? 'fixed inset-0' : 'flex-1 flex flex-col relative'}`}>
+        {/* Canvas Header - Desktop only */}
         {!isMobile && (
           <div className="flex items-center justify-center p-3 bg-background border-b border-border/30">
             <span className="text-xs text-muted-foreground">800 × 500 canvas</span>
@@ -132,30 +132,29 @@ export default function DrawingPage() {
         )}
 
         {/* Drawing Canvas */}
-        <div className={`flex-1 bg-gradient-to-br from-background to-muted/20 overflow-hidden ${isMobile ? 'p-4' : 'p-8'}`}>
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-xl border border-border/20 overflow-hidden">
-              <DrawingCanvas
-                brushSize={drawing.brushSize}
-                brushOpacity={drawing.brushOpacity}
-                currentColor={drawing.currentColor}
-                onCanvasRef={drawing.setCanvasRef}
-                onMousePosition={drawing.setMousePosition}
-              />
-            </div>
-          </div>
-
-          {/* Mobile stroke counter */}
-          {isMobile && (
-            <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-sm rounded-md px-2 py-1 text-xs text-muted-foreground shadow-sm">
-              <span data-testid="text-mobile-stroke-count">
-                {drawing.strokeCount} strokes
-              </span>
+        <div className={`${isMobile ? 'w-full h-full' : 'flex-1 bg-gradient-to-br from-background to-muted/20 overflow-hidden p-8'}`}>
+          {isMobile ? (
+            <DrawingCanvas
+              brushSize={drawing.brushSize}
+              brushOpacity={drawing.brushOpacity}
+              currentColor={drawing.currentColor}
+              onCanvasRef={drawing.setCanvasRef}
+              onMousePosition={drawing.setMousePosition}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="bg-white rounded-2xl shadow-xl border border-border/20 overflow-hidden">
+                <DrawingCanvas
+                  brushSize={drawing.brushSize}
+                  brushOpacity={drawing.brushOpacity}
+                  currentColor={drawing.currentColor}
+                  onCanvasRef={drawing.setCanvasRef}
+                  onMousePosition={drawing.setMousePosition}
+                />
+              </div>
             </div>
           )}
         </div>
-
-        {/* Canvas Footer - Hidden for cleaner look */}
       </div>
 
       {/* Save Drawing Modal */}
