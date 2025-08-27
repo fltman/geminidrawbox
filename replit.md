@@ -6,7 +6,11 @@ This is a digital drawing application built with React and Express that allows u
 - Fully functional AI-powered image generation using Google Gemini via OpenRouter
 - Complete object storage integration for both original and AI-generated images
 - Mobile-responsive canvas interface with touch support
-- 10 predefined Swedish AI prompts for creative transformation
+- Full-screen mobile canvas for optimal drawing experience
+- Ultra-minimal UI with no labels or text clutter
+- 10 predefined English AI prompts for creative transformation
+- Large animated progress indicator during AI generation
+- Floating mobile controls (tools menu, clear, AI generate)
 - Save/load functionality with cloud persistence
 - Side-by-side comparison of original and AI-generated images
 - Debug functionality for examining AI responses
@@ -14,6 +18,14 @@ This is a digital drawing application built with React and Express that allows u
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## UI/UX Preferences (Updated August 27, 2025)
+- Ultra-minimal interface with no unnecessary labels or text
+- Visual controls only (brush sizes as dots, color swatches without labels)
+- Mobile-first design with full-screen canvas on mobile devices
+- Floating controls on mobile instead of fixed toolbars
+- Large, animated progress indicators for AI generation
+- Tool icon instead of hamburger menu on mobile
 
 # System Architecture
 

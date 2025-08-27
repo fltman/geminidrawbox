@@ -48,29 +48,30 @@ export default function DrawingPage() {
         />
       </div>
 
-      {/* Mobile Toolbar */}
+      {/* Mobile Floating Tools */}
       {isMobile && (
         <>
-          <div className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border">
-            <div className="flex items-center justify-between p-4">
-              <div className="w-10"></div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowMobileControls(!showMobileControls)}
-                data-testid="button-mobile-menu"
-              >
-                {showMobileControls ? <X className="w-4 h-4" /> : <Wrench className="w-4 h-4" />}
-              </Button>
-            </div>
+          {/* Floating Tool Button */}
+          <div className="fixed top-4 right-4 z-50">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowMobileControls(!showMobileControls)}
+              className="bg-card/90 backdrop-blur-sm shadow-lg"
+              data-testid="button-mobile-menu"
+            >
+              {showMobileControls ? <X className="w-4 h-4" /> : <Wrench className="w-4 h-4" />}
+            </Button>
+          </div>
 
-            {/* Mobile Quick Tools */}
-            <div className="flex items-center gap-2 px-4 pb-4 overflow-x-auto">
+          {/* Floating Quick Actions */}
+          <div className="fixed bottom-4 left-4 right-4 z-40">
+            <div className="flex items-center gap-2 justify-center">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={drawing.clearCanvas}
-                className="flex-shrink-0"
+                className="bg-card/90 backdrop-blur-sm shadow-lg"
                 data-testid="button-mobile-clear"
               >
                 Clear
@@ -79,26 +80,30 @@ export default function DrawingPage() {
                 size="sm"
                 onClick={() => setShowSaveModal(true)}
                 disabled={drawing.isSaving}
-                className="flex-shrink-0 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
                 data-testid="button-mobile-save"
               >
                 <Sparkles className="w-3 h-3 mr-1" />
                 {drawing.isSaving ? "Generating..." : "AI"}
               </Button>
             </div>
+          </div>
 
-            {/* Mobile Menu Overlay */}
-            {showMobileControls && (
-              <div className="absolute top-full left-0 right-0 bg-card border-b border-border shadow-lg max-h-96 overflow-y-auto z-40">
+          {/* Mobile Menu Overlay */}
+          {showMobileControls && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-card rounded-lg shadow-xl max-h-[80vh] overflow-y-auto w-full max-w-sm">
                 <div className="p-4 space-y-4">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setShowMobileControls(false)}
-                    className="ml-auto"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Tools</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowMobileControls(false)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
                   
                   <BrushControls
                     brushSize={drawing.brushSize}
@@ -112,13 +117,13 @@ export default function DrawingPage() {
                   />
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </>
       )}
 
       {/* Canvas Container */}
-      <div className={`flex-1 flex flex-col ${isMobile ? 'pt-32' : ''} relative`}>
+      <div className="flex-1 flex flex-col relative">
         {/* Canvas Header - Minimized */}
         {!isMobile && (
           <div className="flex items-center justify-center p-3 bg-background border-b border-border/30">
@@ -142,9 +147,9 @@ export default function DrawingPage() {
 
           {/* Mobile stroke counter */}
           {isMobile && (
-            <div className="absolute bottom-4 right-4 bg-card/80 backdrop-blur-sm rounded-md px-2 py-1 text-xs text-muted-foreground shadow-sm">
+            <div className="absolute top-4 left-4 bg-card/80 backdrop-blur-sm rounded-md px-2 py-1 text-xs text-muted-foreground shadow-sm">
               <span data-testid="text-mobile-stroke-count">
-                {drawing.strokeCount} drag
+                {drawing.strokeCount} strokes
               </span>
             </div>
           )}
