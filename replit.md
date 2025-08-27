@@ -2,6 +2,15 @@
 
 This is a digital drawing application built with React and Express that allows users to create, save, and manage drawings through an interactive canvas interface. The application features a full-stack architecture with a React frontend for the drawing interface and an Express backend for handling drawing persistence and file storage. The app provides real-time drawing capabilities with customizable brush controls, color selection, and undo/redo functionality, along with cloud storage integration for saving user creations.
 
+**Key Features Completed (August 27, 2025):**
+- Fully functional AI-powered image generation using Google Gemini via OpenRouter
+- Complete object storage integration for both original and AI-generated images
+- Mobile-responsive canvas interface with touch support
+- 10 predefined Swedish AI prompts for creative transformation
+- Save/load functionality with cloud persistence
+- Side-by-side comparison of original and AI-generated images
+- Debug functionality for examining AI responses
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -37,17 +46,20 @@ The backend implements a clean separation of concerns with dedicated modules for
 **Primary Storage**: Currently uses in-memory storage (`MemStorage` class) for drawings data, which stores:
 - Drawing metadata (title, creation date, unique ID)
 - File path references to stored images
+- AI-generated image paths and prompts
 - Temporary session data
 
 **Database Schema**: Prepared for PostgreSQL with Drizzle ORM, defining:
 - `users` table for user authentication (username, password)
-- `drawings` table for drawing metadata (title, image path, timestamps)
+- `drawings` table for drawing metadata (title, image path, timestamps, generated image paths)
 - UUID-based primary keys for all entities
 
 **File Storage**: Google Cloud Storage integration for persisting drawing images:
 - Object storage service with ACL (Access Control List) support
-- Public object serving capabilities
+- Public object serving capabilities (`/public-objects/` route)
+- Private object serving for user uploads (`/objects/` route)
 - Upload URL generation for client-side file uploads
+- Handles both original drawings and AI-generated images
 
 ## Authentication and Authorization
 
