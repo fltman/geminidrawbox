@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Eraser, Undo, Redo, Save } from "lucide-react";
+import { Eraser, Undo, Redo, Save, Sparkles } from "lucide-react";
 import SaveDrawingModal from "./SaveDrawingModal";
 
 interface DrawingActionsProps {
@@ -73,20 +73,36 @@ export default function DrawingActions({
           </Button>
         </div>
         
-        {/* Save Button */}
-        <div className="mt-6 pt-6 border-t border-border">
+        {/* AI Generate Button - Primary Action */}
+        <div className="mt-6 pt-6 border-t border-border space-y-3">
           <Button
-            className="w-full gap-3 shadow-lg"
+            className="w-full gap-3 shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             onClick={handleSaveClick}
             disabled={isSaving}
             data-testid="button-save-drawing"
           >
-            <Save className="w-4 h-4" />
-            {isSaving ? "Sparar..." : "Spara bild"}
+            <Sparkles className="w-5 h-5" />
+            {isSaving ? "Sparar..." : "Spara & Generera AI"}
           </Button>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Bilden sparas på servern
+          <p className="text-xs text-muted-foreground text-center">
+            Spara din ritning och välj AI-tolkning
           </p>
+          
+          {/* Quick Save Option */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => {
+              const quickTitle = `Ritning ${new Date().toLocaleDateString("sv-SE")} ${new Date().toLocaleTimeString("sv-SE")}`;
+              onSave(quickTitle);
+            }}
+            disabled={isSaving}
+            data-testid="button-quick-save"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Bara spara (utan AI)
+          </Button>
         </div>
       </div>
 
