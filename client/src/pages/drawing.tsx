@@ -94,7 +94,10 @@ export default function DrawingPage() {
               </Button>
               <Button
                 size="sm"
-                onClick={drawing.saveDrawing}
+                onClick={() => {
+                  const title = `Ritning ${new Date().toLocaleDateString("sv-SE")} ${new Date().toLocaleTimeString("sv-SE")}`;
+                  drawing.saveDrawing(title);
+                }}
                 disabled={drawing.isSaving}
                 className="flex-shrink-0"
                 data-testid="button-mobile-save"

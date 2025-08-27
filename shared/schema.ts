@@ -13,6 +13,8 @@ export const drawings = pgTable("drawings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   imagePath: text("image_path").notNull(),
+  prompt: text("prompt"),
+  generatedImagePath: text("generated_image_path"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -24,6 +26,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertDrawingSchema = createInsertSchema(drawings).omit({
   id: true,
   createdAt: true,
+  generatedImagePath: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

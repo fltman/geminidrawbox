@@ -1,0 +1,74 @@
+from openai import OpenAI
+import base64
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=OPENROUTER_API_KEY,
+)
+
+# Function to encode the image
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
+    
+# Path to your image
+import sys
+image_path = sys.argv[1]
+prompt = sys.argv[2]
+
+# Getting the Base64 string
+base64_image = encode_image(image_path)
+
+# For Gemini image generation with image input, we need to use chat completions
+response = client.chat.completions.create(
+    model="google/gemini-2.5-flash-image-preview:free",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": f"Generate an image: {prompt}"
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{base64_image}"
+                    }
+                }
+            ]
+        }
+    ],
+)
+
+
+# Extract and save the image from the response
+if response.choices and response.choices[0].message:
+    message = response.choices[0].message
+    
+    # Print any textual content
+    if message.content:
+        print("Text response:", message.content)
+    
+    # Check if there are images in the message
+    if hasattr(message, 'images') and message.images:
+        for image_data in message.images:
+            if image_data["type"] == "image_url" and image_data["image_url"]["url"].startswith("data:image"):
+                # Extract base64 data from data URL
+                data_url = image_data["image_url"]["url"]
+                # Format: data:image/png;base64,<base64_data>
+                base64_data = data_url.split(',', 1)[1]
+                
+                # Decode and save the image
+                with open("generated_image.png", "wb") as f:
+                    f.write(base64.b64decode(base64_data))
+                print("Image saved as generated_image.png")
+                break
+    else:
+        print("No images found in response")

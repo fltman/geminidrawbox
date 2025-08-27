@@ -32,7 +32,7 @@ export function useDrawing() {
   });
 
   const saveDrawingMutation = useMutation({
-    mutationFn: async (imageData: { title: string; imagePath: string }) => {
+    mutationFn: async (imageData: { title: string; imagePath: string; prompt?: string }) => {
       return await apiRequest("POST", "/api/drawings", imageData);
     },
     onSuccess: () => {
@@ -46,6 +46,26 @@ export function useDrawing() {
       toast({
         title: "Fel vid sparande",
         description: "Kunde inte spara ritningen. Försök igen.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const generateImageMutation = useMutation({
+    mutationFn: async ({ drawingId, prompt }: { drawingId: string; prompt: string }) => {
+      return await apiRequest("POST", `/api/drawings/${drawingId}/generate`, { prompt });
+    },
+    onSuccess: () => {
+      toast({
+        title: "AI-bild genererad!",
+        description: "Den nya bilden har skapats med Gemini AI.",
+      });
+    },
+    onError: (error) => {
+      console.error("Generation error:", error);
+      toast({
+        title: "Fel vid generering",
+        description: "Kunde inte generera AI-bilden. Försök igen.",
         variant: "destructive",
       });
     },
@@ -167,7 +187,7 @@ export function useDrawing() {
     }));
   }, []);
 
-  const saveDrawing = useCallback(async () => {
+  const saveDrawing = useCallback(async (title: string, prompt?: string) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -198,11 +218,26 @@ export function useDrawing() {
       }
 
       // Save drawing metadata
-      const title = `Ritning ${new Date().toLocaleDateString("sv-SE")} ${new Date().toLocaleTimeString("sv-SE")}`;
-      await saveDrawingMutation.mutateAsync({
+      const response = await saveDrawingMutation.mutateAsync({
         title,
         imagePath: uploadURL,
+        prompt,
       });
+      
+      const savedDrawing = await response.json();
+
+      // If prompt is provided, generate AI image
+      if (prompt && savedDrawing.id) {
+        try {
+          await generateImageMutation.mutateAsync({
+            drawingId: savedDrawing.id,
+            prompt,
+          });
+        } catch (genError) {
+          console.error("AI generation error:", genError);
+          // Don't fail the entire save process if AI generation fails
+        }
+      }
 
     } catch (error) {
       console.error("Save error:", error);
@@ -214,7 +249,7 @@ export function useDrawing() {
     } finally {
       setState(prev => ({ ...prev, isSaving: false }));
     }
-  }, [getUploadUrlMutation, saveDrawingMutation, toast]);
+  }, [getUploadUrlMutation, saveDrawingMutation, generateImageMutation, toast]);
 
   return {
     ...state,
