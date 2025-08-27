@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Eraser, Undo, Redo, Sparkles } from "lucide-react";
+import { Eraser, Sparkles } from "lucide-react";
 import SaveDrawingModal from "./SaveDrawingModal";
 
 interface DrawingActionsProps {
@@ -36,37 +36,17 @@ export default function DrawingActions({
   return (
     <>
       <div className="p-4 space-y-3">
-        {/* Quick Actions */}
-        <div className="grid grid-cols-3 gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onUndo}
-            disabled={!canUndo}
-            data-testid="button-undo"
-          >
-            <Undo className="w-4 h-4" />
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onRedo}
-            disabled={!canRedo}
-            data-testid="button-redo"
-          >
-            <Redo className="w-4 h-4" />
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClear}
-            data-testid="button-clear-canvas"
-          >
-            <Eraser className="w-4 h-4" />
-          </Button>
-        </div>
+        {/* Clear Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={onClear}
+          data-testid="button-clear-canvas"
+        >
+          <Eraser className="w-4 h-4 mr-2" />
+          Clear
+        </Button>
         
         {/* AI Generate Button */}
         <Button
