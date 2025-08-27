@@ -50,33 +50,79 @@ export async function generateImageFromDrawing(
       if (message.content) {
         console.log("Gemini text response:", message.content);
         console.log("Message object keys:", Object.keys(message));
-        console.log("Full message:", JSON.stringify(message, null, 2));
+        console.log("Message content type:", typeof message.content);
+        console.log("Message content is array:", Array.isArray(message.content));
+        if (Array.isArray(message.content)) {
+          console.log("Content parts:", message.content.map(part => Object.keys(part)));
+        }
       }
 
-      // Check if the response content contains an image URL
-      if (message.content && typeof message.content === "string") {
-        const imageUrlRegex =
-          /!\[.*?\]\((https:\/\/.*?\.(?:png|jpg|jpeg|gif|webp))\)/g;
-        const matches = message.content.match(imageUrlRegex);
+      // Check for image data in response - Gemini 2.5 Flash Image returns base64 data
+      if (response.choices && response.choices[0].message.content) {
+        const content = response.choices[0].message.content;
+        
+        // Check if content is an array with image parts (multimodal response)
+        if (Array.isArray(content)) {
+          for (const part of content) {
+            if (part.type === "image_url" && part.image_url && part.image_url.url) {
+              // Extract base64 image data from data URL
+              const dataUrl = part.image_url.url;
+              if (dataUrl.startsWith("data:image/")) {
+                const base64Data = dataUrl.split(',')[1];
+                const imageBuffer = Buffer.from(base64Data, "base64");
+                console.log("Found base64 image in multimodal response, size:", imageBuffer.length, "bytes");
+                
+                return {
+                  success: true,
+                  imageData: imageBuffer,
+                };
+              }
+            }
+          }
+        }
+        
+        // Check if content is a string containing base64 image data
+        if (typeof content === "string") {
+          // Look for base64 image data in the content string
+          const base64Regex = /data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/g;
+          const base64Match = base64Regex.exec(content);
+          
+          if (base64Match && base64Match[1]) {
+            const imageBuffer = Buffer.from(base64Match[1], "base64");
+            console.log("Found base64 image in string content, size:", imageBuffer.length, "bytes");
+            
+            return {
+              success: true,
+              imageData: imageBuffer,
+            };
+          }
+        }
+        
+        // Fallback: Check if the response content contains an image URL
+        if (typeof content === "string") {
+          const imageUrlRegex =
+            /!\[.*?\]\((https:\/\/.*?\.(?:png|jpg|jpeg|gif|webp))\)/g;
+          const matches = content.match(imageUrlRegex);
 
-        if (matches && matches.length > 0) {
-          const imageUrl = matches[0].match(/\((https:\/\/.*?)\)/)?.[1];
-          if (imageUrl) {
-            try {
-              const response = await fetch(imageUrl);
-              const imageBuffer = Buffer.from(await response.arrayBuffer());
-              console.log(
-                "Downloaded generated image, size:",
-                imageBuffer.length,
-                "bytes",
-              );
+          if (matches && matches.length > 0) {
+            const imageUrl = matches[0].match(/\((https:\/\/.*?)\)/)?.[1];
+            if (imageUrl) {
+              try {
+                const response = await fetch(imageUrl);
+                const imageBuffer = Buffer.from(await response.arrayBuffer());
+                console.log(
+                  "Downloaded generated image, size:",
+                  imageBuffer.length,
+                  "bytes",
+                );
 
-              return {
-                success: true,
-                imageData: imageBuffer,
-              };
-            } catch (fetchError) {
-              console.error("Error downloading generated image:", fetchError);
+                return {
+                  success: true,
+                  imageData: imageBuffer,
+                };
+              } catch (fetchError) {
+                console.error("Error downloading generated image:", fetchError);
+              }
             }
           }
         }
