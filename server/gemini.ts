@@ -57,22 +57,24 @@ export async function generateImageFromDrawing(
         }
       }
 
-      // Check for image data in response - from the actual logged structure
-      if (response.choices && response.choices[0].message.content) {
-        const content = response.choices[0].message.content;
+      // Extract and save the image from the response - following the known pattern
+      if (response.choices && response.choices[0].message) {
+        const message = response.choices[0].message;
         
-        // Gemini returns content as array with text and image parts
-        if (Array.isArray(content)) {
-          for (const part of content) {
-            console.log("Checking part with keys:", Object.keys(part));
-            
-            // Check for image_url part (standard OpenAI format)
-            if (part.type === "image_url" && part.image_url && part.image_url.url) {
-              const dataUrl = part.image_url.url;
-              if (dataUrl.startsWith("data:image/")) {
-                const base64Data = dataUrl.split(',')[1];
+        // Check if there are images in the message
+        if (message.images && Array.isArray(message.images)) {
+          console.log("Found images array with", message.images.length, "images");
+          
+          for (const imageData of message.images) {
+            if (imageData.type === "image_url" && imageData.image_url && imageData.image_url.url) {
+              const dataUrl = imageData.image_url.url;
+              if (dataUrl.startsWith("data:image")) {
+                console.log("Found image with data URL, extracting base64...");
+                // Extract base64 data from data URL - Format: data:image/png;base64,<base64_data>
+                const base64Data = dataUrl.split(',', 2)[1];
+                
                 const imageBuffer = Buffer.from(base64Data, "base64");
-                console.log("Found base64 image in image_url part, size:", imageBuffer.length, "bytes");
+                console.log("Successfully extracted image, size:", imageBuffer.length, "bytes");
                 
                 return {
                   success: true,
@@ -80,69 +82,28 @@ export async function generateImageFromDrawing(
                 };
               }
             }
-            
-            // Check for direct image part (Gemini specific)
-            if (part.type === "image" && part.image) {
-              let base64Data = part.image;
-              // Remove data URL prefix if present
-              if (base64Data.includes(',')) {
-                base64Data = base64Data.split(',')[1];
-              }
-              const imageBuffer = Buffer.from(base64Data, "base64");
-              console.log("Found base64 image in image part, size:", imageBuffer.length, "bytes");
-              
-              return {
-                success: true,
-                imageData: imageBuffer,
-              };
-            }
-            
-            // Check for any field containing base64 data - including nested objects
-            const checkForBase64 = (obj: any, path: string = '') => {
-              if (typeof obj === "string" && obj.length > 1000) {
-                if (obj.startsWith("data:image/")) {
-                  console.log(`Found data URL in ${path}, length:`, obj.length);
-                  const base64Data = obj.split(',')[1];
+          }
+        } else {
+          console.log("No images found in message, checking content array...");
+          
+          // Fallback: check content array for image parts
+          if (Array.isArray(message.content)) {
+            for (const part of message.content) {
+              if (part.type === "image_url" && part.image_url && part.image_url.url) {
+                const dataUrl = part.image_url.url;
+                if (dataUrl.startsWith("data:image")) {
+                  console.log("Found image in content array, extracting base64...");
+                  const base64Data = dataUrl.split(',', 2)[1];
                   
-                  try {
-                    const imageBuffer = Buffer.from(base64Data, "base64");
-                    console.log("Successfully decoded base64 from", path, "size:", imageBuffer.length, "bytes");
-                    
-                    return {
-                      success: true,
-                      imageData: imageBuffer,
-                    };
-                  } catch (e) {
-                    console.log("Failed to decode base64 from", path);
-                  }
-                } else if (/^[A-Za-z0-9+/=]{100,}$/.test(obj)) {
-                  console.log(`Found potential raw base64 in ${path}, length:`, obj.length);
-                  try {
-                    const imageBuffer = Buffer.from(obj, "base64");
-                    console.log("Successfully decoded raw base64 from", path, "size:", imageBuffer.length, "bytes");
-                    
-                    return {
-                      success: true,
-                      imageData: imageBuffer,
-                    };
-                  } catch (e) {
-                    console.log("Failed to decode raw base64 from", path);
-                  }
-                }
-              } else if (typeof obj === "object" && obj !== null) {
-                for (const [key, value] of Object.entries(obj)) {
-                  const result = checkForBase64(value, path ? `${path}.${key}` : key);
-                  if (result && result.success) {
-                    return result;
-                  }
+                  const imageBuffer = Buffer.from(base64Data, "base64");
+                  console.log("Successfully extracted image from content, size:", imageBuffer.length, "bytes");
+                  
+                  return {
+                    success: true,
+                    imageData: imageBuffer,
+                  };
                 }
               }
-              return null;
-            };
-            
-            const result = checkForBase64(part, `part[${content.indexOf(part)}]`);
-            if (result && result.success) {
-              return result;
             }
           }
         }
