@@ -45,10 +45,7 @@ export default function DrawingPage() {
           onClear={drawing.clearCanvas}
           onUndo={drawing.undo}
           onRedo={drawing.redo}
-          onSave={(title: string, prompt?: string) => {
-            drawing.saveDrawing(title, prompt);
-            setShowSaveModal(false);
-          }}
+          onSave={drawing.saveDrawing}
           canUndo={drawing.canUndo}
           canRedo={drawing.canRedo}
           isSaving={drawing.isSaving}

@@ -107,14 +107,14 @@ export default function DrawingCanvas({
       {/* Canvas Border and Info */}
       <div className="absolute -top-8 left-0 right-0 flex justify-between items-center text-xs text-muted-foreground px-2 hidden sm:flex">
         <span>Ritruta</span>
-        <span>1200 × 800 px</span>
+        <span>800 × 500 px</span>
       </div>
       
       {/* Canvas with Enhanced Border */}
       <canvas
         ref={canvasRef}
-        width={1200}
-        height={800}
+        width={800}
+        height={500}
         className="drawing-canvas rounded-lg max-w-full max-h-full cursor-crosshair bg-white shadow-xl border-4 border-slate-400 dark:border-slate-500 transition-all duration-200 hover:shadow-2xl"
         onMouseDown={startDrawing}
         onMouseMove={handleMouseMove}
@@ -134,10 +134,10 @@ export default function DrawingCanvas({
       
       {/* Corner Size Indicators - Hidden on mobile */}
       <div className="absolute -bottom-6 left-0 text-xs text-muted-foreground hidden sm:block">
-        Bredd: 1200px
+        Bredd: 800px
       </div>
       <div className="absolute -right-16 bottom-0 text-xs text-muted-foreground transform rotate-90 origin-bottom-left hidden sm:block">
-        Höjd: 800px
+        Höjd: 500px
       </div>
     </div>
   );
