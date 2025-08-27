@@ -20,10 +20,7 @@ export default function DrawingPage() {
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar Toolbar */}
       <div className="hidden md:flex flex-col w-56 bg-card/50 border-r border-border/50 shadow-sm overflow-y-auto">
-        {/* Toolbar Header */}
-        <div className="p-4 border-b border-border/50">
-          <h1 className="text-lg font-medium text-foreground">✨ AI Studio</h1>
-        </div>
+
 
         {/* Brush Controls */}
         <BrushControls

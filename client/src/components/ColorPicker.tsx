@@ -11,8 +11,6 @@ const colorSwatches = [
 export default function ColorPicker({ currentColor, onColorChange }: ColorPickerProps) {
   return (
     <div className="p-4 space-y-4">
-      <h3 className="text-sm font-medium text-muted-foreground">🎨 Colors</h3>
-      
       {/* Color Grid */}
       <div className="grid grid-cols-5 gap-2">
         {colorSwatches.map((color) => (
@@ -29,8 +27,7 @@ export default function ColorPicker({ currentColor, onColorChange }: ColorPicker
       </div>
       
       {/* Custom Color Picker */}
-      <div className="space-y-2">
-        <span className="text-xs text-muted-foreground">Custom</span>
+      <div>
         <input
           type="color"
           value={currentColor}

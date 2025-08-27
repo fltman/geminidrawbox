@@ -12,9 +12,7 @@ export default function BrushControls({
   onBrushSizeChange,
 }: BrushControlsProps) {
   return (
-    <div className="p-4 space-y-4">
-      <h3 className="text-sm font-medium text-muted-foreground">🖌️ Brush Size</h3>
-      
+    <div className="p-4">
       <div className="grid grid-cols-5 gap-2">
         {brushSizes.map((size) => (
           <button
