@@ -4,6 +4,7 @@ import DrawingCanvas from "@/components/DrawingCanvas";
 import ColorPicker from "@/components/ColorPicker";
 import BrushControls from "@/components/BrushControls";
 import DrawingActions from "@/components/DrawingActions";
+import GeneratedImageModal from "@/components/GeneratedImageModal";
 import { useDrawing } from "@/hooks/useDrawing";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
@@ -174,6 +175,16 @@ export default function DrawingPage() {
           </div>
         )}
       </div>
+
+      {/* Generated Image Modal */}
+      <GeneratedImageModal
+        open={drawing.showGeneratedImage}
+        onClose={drawing.closeGeneratedImageModal}
+        originalImageUrl={drawing.lastSavedDrawing?.originalImagePath}
+        generatedImageUrl={drawing.lastSavedDrawing?.generatedImagePath}
+        prompt={drawing.lastSavedDrawing?.prompt}
+        title={drawing.lastSavedDrawing?.title}
+      />
     </div>
   );
 }

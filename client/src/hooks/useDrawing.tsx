@@ -12,6 +12,14 @@ interface DrawingState {
   canUndo: boolean;
   canRedo: boolean;
   isSaving: boolean;
+  showGeneratedImage: boolean;
+  lastSavedDrawing?: {
+    id: string;
+    title: string;
+    originalImagePath: string;
+    generatedImagePath?: string;
+    prompt?: string;
+  };
 }
 
 export function useDrawing() {
@@ -29,6 +37,7 @@ export function useDrawing() {
     canUndo: false,
     canRedo: false,
     isSaving: false,
+    showGeneratedImage: false,
   });
 
   const saveDrawingMutation = useMutation({
@@ -55,11 +64,21 @@ export function useDrawing() {
     mutationFn: async ({ drawingId, prompt }: { drawingId: string; prompt: string }) => {
       return await apiRequest("POST", `/api/drawings/${drawingId}/generate`, { prompt });
     },
-    onSuccess: () => {
+    onSuccess: async (response) => {
+      const generatedData = await response.json();
       toast({
         title: "AI-bild genererad!",
         description: "Den nya bilden har skapats med Gemini AI.",
       });
+      // Update state to show the generated image
+      setState(prev => ({
+        ...prev,
+        showGeneratedImage: true,
+        lastSavedDrawing: prev.lastSavedDrawing ? {
+          ...prev.lastSavedDrawing,
+          generatedImagePath: generatedData.generatedImagePath,
+        } : undefined,
+      }));
     },
     onError: (error) => {
       console.error("Generation error:", error);
@@ -226,6 +245,17 @@ export function useDrawing() {
       
       const savedDrawing = await response.json();
 
+      // Store the saved drawing info
+      setState(prev => ({
+        ...prev,
+        lastSavedDrawing: {
+          id: savedDrawing.id,
+          title: savedDrawing.title,
+          originalImagePath: savedDrawing.imagePath,
+          prompt: savedDrawing.prompt,
+        },
+      }));
+
       // If prompt is provided, generate AI image
       if (prompt && savedDrawing.id) {
         try {
@@ -237,6 +267,12 @@ export function useDrawing() {
           console.error("AI generation error:", genError);
           // Don't fail the entire save process if AI generation fails
         }
+      } else if (!prompt) {
+        // If no AI generation, still show success
+        setState(prev => ({
+          ...prev,
+          showGeneratedImage: false,
+        }));
       }
 
     } catch (error) {
@@ -251,6 +287,10 @@ export function useDrawing() {
     }
   }, [getUploadUrlMutation, saveDrawingMutation, generateImageMutation, toast]);
 
+  const closeGeneratedImageModal = useCallback(() => {
+    setState(prev => ({ ...prev, showGeneratedImage: false }));
+  }, []);
+
   return {
     ...state,
     setCanvasRef,
@@ -263,5 +303,6 @@ export function useDrawing() {
     redo,
     saveDrawing,
     saveState,
+    closeGeneratedImageModal,
   };
 }
