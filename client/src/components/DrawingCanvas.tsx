@@ -85,6 +85,17 @@ export default function DrawingCanvas({
     setIsDrawing(true);
     setLastPoint(point);
     onMousePosition(point);
+
+    // Draw initial dot for brush start
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx) {
+      ctx.fillStyle = currentColor;
+      ctx.globalAlpha = brushOpacity;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, brushSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
   };
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
@@ -98,14 +109,38 @@ export default function DrawingCanvas({
     const ctx = canvas?.getContext("2d");
     if (!ctx) return;
 
+    // Set up brush properties for smooth, round strokes
     ctx.strokeStyle = currentColor;
     ctx.lineWidth = brushSize;
     ctx.globalAlpha = brushOpacity;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.imageSmoothingEnabled = true;
 
-    ctx.beginPath();
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    ctx.lineTo(point.x, point.y);
-    ctx.stroke();
+    // Calculate distance between points for smoother drawing
+    const distance = Math.sqrt(
+      Math.pow(point.x - lastPoint.x, 2) + Math.pow(point.y - lastPoint.y, 2)
+    );
+
+    // If points are close, draw a smooth line
+    if (distance < brushSize * 2) {
+      ctx.beginPath();
+      ctx.moveTo(lastPoint.x, lastPoint.y);
+      ctx.lineTo(point.x, point.y);
+      ctx.stroke();
+    } else {
+      // For larger distances, interpolate points for smoother lines
+      const steps = Math.ceil(distance / (brushSize / 2));
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        const x = lastPoint.x + (point.x - lastPoint.x) * t;
+        const y = lastPoint.y + (point.y - lastPoint.y) * t;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
 
     setLastPoint(point);
   };
