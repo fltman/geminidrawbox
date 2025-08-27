@@ -35,11 +35,11 @@ export default function DrawingActions({
 
   return (
     <>
-      <div className="p-6 flex-1 flex flex-col">
+      <div className="p-6 flex-shrink-0">
         <h3 className="text-sm font-medium text-foreground mb-4">Åtgärder</h3>
         
         {/* Action Buttons */}
-        <div className="space-y-3 flex-1">
+        <div className="space-y-3">
           <Button
             variant="outline"
             className="w-full justify-start gap-3"
@@ -74,7 +74,7 @@ export default function DrawingActions({
         </div>
         
         {/* AI Generate Button - Primary Action */}
-        <div className="mt-6 pt-6 border-t border-border space-y-3">
+        <div className="mt-4 pt-4 border-t border-border space-y-3">
           <Button
             className="w-full gap-3 shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             onClick={handleSaveClick}
