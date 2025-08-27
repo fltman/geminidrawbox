@@ -15,16 +15,16 @@ interface SaveDrawingModalProps {
 }
 
 const presetPrompts = [
-  "rolig fluffig monster med stora ögon",
-  "färgglad regnbågsfågel som flyger",
-  "magisk skog med lysande träd på natten",
-  "cyber robot warrior i futuristisk stil",
-  "söt kattunge som flyger i rymden",
-  "drömlik undervattenvärld med koraller",
-  "steampunk luftskepp med koppardetaljer",
-  "mystisk drake som sprutar eld",
-  "kawaii panda som äter bamboo",
-  "fantasiprinsessa i glittrande klänning"
+  "fluffy monster",
+  "scary plush toy", 
+  "made out of metal",
+  "cyberpunk style",
+  "cute kawaii version",
+  "steampunk design",
+  "underwater creature",
+  "space robot",
+  "fantasy dragon",
+  "cartoon style"
 ];
 
 export default function SaveDrawingModal({ 
