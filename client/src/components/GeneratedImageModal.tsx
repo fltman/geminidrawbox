@@ -139,9 +139,15 @@ export default function GeneratedImageModal({
           </div>
 
           {!generatedImageUrl && (
-            <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Genererar AI-bild...</p>
+            <div className="text-center py-12">
+              <div className="mb-6">
+                <div className="text-6xl animate-bounce">🎨</div>
+                <div className="text-4xl animate-pulse mt-2">✨</div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg font-medium">AI is painting your masterpiece...</p>
+                <p className="text-sm text-muted-foreground animate-pulse">Adding magical touches 🪄</p>
+              </div>
             </div>
           )}
         </div>

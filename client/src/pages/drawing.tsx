@@ -165,29 +165,25 @@ export default function DrawingPage() {
 
       {/* Canvas Container */}
       <div className={`flex-1 flex flex-col ${isMobile ? 'pt-32' : ''} relative`}>
-        {/* Canvas Header */}
+        {/* Canvas Header - Minimized */}
         {!isMobile && (
-          <div className="flex items-center justify-between p-6 bg-card border-b border-border">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">Status:</span>
-              <span className="text-sm font-medium text-green-600">Redo att rita</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">1200 × 800 px</span>
-            </div>
+          <div className="flex items-center justify-center p-3 bg-background border-b border-border/30">
+            <span className="text-xs text-muted-foreground">800 × 500 canvas</span>
           </div>
         )}
 
         {/* Drawing Canvas */}
-        <div className={`flex-1 bg-muted/30 overflow-auto ${isMobile ? 'p-4' : 'p-12'}`}>
-          <div className="w-full h-full flex items-center justify-center min-h-[800px]">
-            <DrawingCanvas
-              brushSize={drawing.brushSize}
-              brushOpacity={drawing.brushOpacity}
-              currentColor={drawing.currentColor}
-              onCanvasRef={drawing.setCanvasRef}
-              onMousePosition={drawing.setMousePosition}
-            />
+        <div className={`flex-1 bg-gradient-to-br from-background to-muted/20 overflow-hidden ${isMobile ? 'p-4' : 'p-8'}`}>
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-xl border border-border/20 overflow-hidden">
+              <DrawingCanvas
+                brushSize={drawing.brushSize}
+                brushOpacity={drawing.brushOpacity}
+                currentColor={drawing.currentColor}
+                onCanvasRef={drawing.setCanvasRef}
+                onMousePosition={drawing.setMousePosition}
+              />
+            </div>
           </div>
 
           {/* Mobile stroke counter */}
@@ -200,24 +196,7 @@ export default function DrawingPage() {
           )}
         </div>
 
-        {/* Canvas Footer */}
-        {!isMobile && (
-          <div className="flex items-center justify-between p-4 bg-card border-t border-border text-sm text-muted-foreground">
-            <div className="flex items-center gap-6">
-              <span data-testid="text-mouse-position">
-                X: {drawing.mousePosition.x}, Y: {drawing.mousePosition.y}
-              </span>
-              <span data-testid="text-brush-info">
-                Pensel: {drawing.brushSize}px, {drawing.currentColor}
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span data-testid="text-stroke-count">
-                Penseldrag: {drawing.strokeCount}
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Canvas Footer - Hidden for cleaner look */}
       </div>
 
       {/* Save Drawing Modal */}

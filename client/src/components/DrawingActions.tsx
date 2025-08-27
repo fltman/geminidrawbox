@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Eraser, Undo, Redo, Save, Sparkles } from "lucide-react";
+import { Eraser, Undo, Redo, Sparkles } from "lucide-react";
 import SaveDrawingModal from "./SaveDrawingModal";
 
 interface DrawingActionsProps {
@@ -35,75 +35,62 @@ export default function DrawingActions({
 
   return (
     <>
-      <div className="p-6 flex-shrink-0">
-        <h3 className="text-sm font-medium text-foreground mb-4">Åtgärder</h3>
+      <div className="p-4 space-y-4">
+        <h3 className="text-sm font-medium text-muted-foreground">⚡ Actions</h3>
         
-        {/* Action Buttons */}
-        <div className="space-y-3">
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-2">
           <Button
             variant="outline"
-            className="w-full justify-start gap-3"
-            onClick={onClear}
-            data-testid="button-clear-canvas"
-          >
-            <Eraser className="w-4 h-4" />
-            Rensa rityta
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-3"
+            size="sm"
             onClick={onUndo}
             disabled={!canUndo}
             data-testid="button-undo"
           >
             <Undo className="w-4 h-4" />
-            Ångra
           </Button>
           
           <Button
             variant="outline"
-            className="w-full justify-start gap-3"
+            size="sm"
             onClick={onRedo}
             disabled={!canRedo}
             data-testid="button-redo"
           >
             <Redo className="w-4 h-4" />
-            Gör om
           </Button>
         </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={onClear}
+          data-testid="button-clear-canvas"
+        >
+          <Eraser className="w-4 h-4 mr-2" />
+          Clear
+        </Button>
         
-        {/* AI Generate Button - Primary Action */}
-        <div className="mt-4 pt-4 border-t border-border space-y-3">
-          <Button
-            className="w-full gap-3 shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-            onClick={handleSaveClick}
-            disabled={isSaving}
-            data-testid="button-save-drawing"
-          >
-            <Sparkles className="w-5 h-5" />
-            {isSaving ? "Sparar..." : "Spara & Generera AI"}
-          </Button>
-          <p className="text-xs text-muted-foreground text-center">
-            Spara din ritning och välj AI-tolkning
-          </p>
-          
-          {/* Quick Save Option */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() => {
-              const quickTitle = `Ritning ${new Date().toLocaleDateString("sv-SE")} ${new Date().toLocaleTimeString("sv-SE")}`;
-              onSave(quickTitle);
-            }}
-            disabled={isSaving}
-            data-testid="button-quick-save"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            Bara spara (utan AI)
-          </Button>
-        </div>
+        {/* AI Generate Button */}
+        <Button
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+          onClick={handleSaveClick}
+          disabled={isSaving}
+          data-testid="button-save-drawing"
+        >
+          {isSaving ? (
+            <>
+              <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Generate AI
+            </>
+          )}
+        </Button>
       </div>
 
       <SaveDrawingModal
