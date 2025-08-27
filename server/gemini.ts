@@ -31,7 +31,7 @@ export async function generateImageFromDrawing(
           content: [
             {
               type: "text",
-              text: `Generate an image based on this image and prompt31111111111111111111111111111e111111111111111111111111111111: ${prompt}`,
+              text: `Generate an image based on this image and prompt: ${prompt}`,
             },
             {
               type: "image_url",
@@ -52,31 +52,49 @@ export async function generateImageFromDrawing(
         console.log("Gemini text response:", message.content);
         console.log("Message object keys:", Object.keys(message));
         console.log("Message content type:", typeof message.content);
-        console.log("Message content is array:", Array.isArray(message.content));
+        console.log(
+          "Message content is array:",
+          Array.isArray(message.content),
+        );
         if (Array.isArray(message.content)) {
-          console.log("Content parts:", message.content.map(part => Object.keys(part)));
+          console.log(
+            "Content parts:",
+            message.content.map((part) => Object.keys(part)),
+          );
         }
       }
 
       // Extract and save the image from the response - following the known pattern
       if (response.choices && response.choices[0].message) {
         const message = response.choices[0].message;
-        
+
         // Check if there are images in the message
         if (message.images && Array.isArray(message.images)) {
-          console.log("Found images array with", message.images.length, "images");
-          
+          console.log(
+            "Found images array with",
+            message.images.length,
+            "images",
+          );
+
           for (const imageData of message.images) {
-            if (imageData.type === "image_url" && imageData.image_url && imageData.image_url.url) {
+            if (
+              imageData.type === "image_url" &&
+              imageData.image_url &&
+              imageData.image_url.url
+            ) {
               const dataUrl = imageData.image_url.url;
               if (dataUrl.startsWith("data:image")) {
                 console.log("Found image with data URL, extracting base64...");
                 // Extract base64 data from data URL - Format: data:image/png;base64,<base64_data>
-                const base64Data = dataUrl.split(',', 2)[1];
-                
+                const base64Data = dataUrl.split(",", 2)[1];
+
                 const imageBuffer = Buffer.from(base64Data, "base64");
-                console.log("Successfully extracted image, size:", imageBuffer.length, "bytes");
-                
+                console.log(
+                  "Successfully extracted image, size:",
+                  imageBuffer.length,
+                  "bytes",
+                );
+
                 return {
                   success: true,
                   imageData: imageBuffer,
@@ -87,19 +105,29 @@ export async function generateImageFromDrawing(
           }
         } else {
           console.log("No images found in message, checking content array...");
-          
+
           // Fallback: check content array for image parts
           if (Array.isArray(message.content)) {
             for (const part of message.content) {
-              if (part.type === "image_url" && part.image_url && part.image_url.url) {
+              if (
+                part.type === "image_url" &&
+                part.image_url &&
+                part.image_url.url
+              ) {
                 const dataUrl = part.image_url.url;
                 if (dataUrl.startsWith("data:image")) {
-                  console.log("Found image in content array, extracting base64...");
-                  const base64Data = dataUrl.split(',', 2)[1];
-                  
+                  console.log(
+                    "Found image in content array, extracting base64...",
+                  );
+                  const base64Data = dataUrl.split(",", 2)[1];
+
                   const imageBuffer = Buffer.from(base64Data, "base64");
-                  console.log("Successfully extracted image from content, size:", imageBuffer.length, "bytes");
-                  
+                  console.log(
+                    "Successfully extracted image from content, size:",
+                    imageBuffer.length,
+                    "bytes",
+                  );
+
                   return {
                     success: true,
                     imageData: imageBuffer,
@@ -110,7 +138,7 @@ export async function generateImageFromDrawing(
             }
           }
         }
-        
+
         // Fallback: Check if the response content contains an image URL
         if (typeof content === "string") {
           const imageUrlRegex =
