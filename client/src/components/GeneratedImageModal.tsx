@@ -1,30 +1,28 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Download, X } from "lucide-react";
+import { Download, X } from "lucide-react";
 
 interface GeneratedImageModalProps {
   open: boolean;
   onClose: () => void;
   originalImageUrl?: string;
   generatedImageUrl?: string;
-  prompt?: string;
   title?: string;
+  prompt?: string;
   drawingId?: string;
 }
 
-export default function GeneratedImageModal({ 
-  open, 
+export default function GeneratedImageModal({
+  open,
   onClose,
-  originalImageUrl,
   generatedImageUrl,
-  prompt,
-  title,
-  drawingId
+  drawingId,
+  prompt
 }: GeneratedImageModalProps) {
-  const handleDownload = (imageUrl: string, filename: string) => {
+
+  const handleDownload = (url: string, filename: string) => {
     const link = document.createElement('a');
-    link.href = imageUrl;
+    link.href = url;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
@@ -35,18 +33,13 @@ export default function GeneratedImageModal({
     if (!drawingId || !prompt) return;
     
     try {
-      const response = await fetch(`/api/drawings/${drawingId}/debug-response`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
-      });
-      
+      const response = await fetch(`/api/drawings/${drawingId}/debug?prompt=${encodeURIComponent(prompt)}`);
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `gemini-debug-${Date.now()}.json`;
+        link.download = `debug-response-${drawingId}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -59,115 +52,76 @@ export default function GeneratedImageModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            AI-genererad bild klar!
-          </DialogTitle>
-          <DialogDescription>
-            {title && `"${title}" - `}
-            Din ritning har omvandlats med AI-magi
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Prompt Display */}
-          {prompt && (
-            <div className="p-3 bg-secondary/50 rounded-lg">
-              <Badge variant="outline" className="mb-2">
-                AI-prompt
-              </Badge>
-              <p className="text-sm text-foreground">{prompt}</p>
+      <DialogContent className="w-[95vw] max-w-5xl max-h-[95vh] overflow-hidden p-6 border-0">
+        
+        {/* Large Funny Progress Indicator */}
+        {!generatedImageUrl && (
+          <div className="text-center py-20">
+            <div className="relative mb-12">
+              <div className="text-9xl animate-bounce">🎨</div>
+              <div className="absolute -top-4 -right-4 text-6xl animate-ping">✨</div>
+              <div className="absolute -bottom-4 -left-4 text-5xl animate-pulse">🪄</div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl animate-spin">🌟</div>
             </div>
-          )}
-
-          {/* Image Comparison */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Original Drawing */}
-            {originalImageUrl && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">Original ritning</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownload(originalImageUrl, 'original-drawing.png')}
-                    data-testid="button-download-original"
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="relative bg-white rounded-lg border overflow-hidden">
-                  <img
-                    src={originalImageUrl}
-                    alt="Original ritning"
-                    className="w-full h-auto max-h-80 object-contain"
-                    data-testid="img-original-drawing"
-                  />
-                </div>
+            
+            <div className="space-y-6">
+              <div className="text-3xl font-bold animate-pulse bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                AI Magic in Progress...
               </div>
-            )}
-
-            {/* Generated Image */}
-            {generatedImageUrl && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    AI-genererad
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownload(generatedImageUrl, 'ai-generated.png')}
-                    data-testid="button-download-generated"
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="relative bg-white rounded-lg border overflow-hidden">
-                  <img
-                    src={generatedImageUrl}
-                    alt="AI-genererad bild"
-                    className="w-full h-auto max-h-80 object-contain"
-                    data-testid="img-generated"
-                  />
-                </div>
+              
+              <div className="flex justify-center space-x-3">
+                <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-4 h-4 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-4 h-4 bg-pink-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <div className="w-4 h-4 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
               </div>
-            )}
+              
+              <div className="text-xl text-muted-foreground animate-pulse">
+                Creating something amazing... 🚀
+              </div>
+            </div>
           </div>
+        )}
 
-          {!generatedImageUrl && (
-            <div className="text-center py-12">
-              <div className="mb-6">
-                <div className="text-6xl animate-bounce">🎨</div>
-                <div className="text-4xl animate-pulse mt-2">✨</div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-lg font-medium">AI is painting your masterpiece...</p>
-                <p className="text-sm text-muted-foreground animate-pulse">Adding magical touches 🪄</p>
-              </div>
+        {/* Full Screen AI Image Display */}
+        {generatedImageUrl && (
+          <div className="relative w-full h-full flex flex-col items-center">
+            <img
+              src={generatedImageUrl}
+              alt="AI Generated Masterpiece"
+              className="w-full h-auto max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+              data-testid="img-generated"
+            />
+            
+            {/* Download Button Overlay */}
+            <div className="absolute top-6 right-6">
+              <Button
+                onClick={() => handleDownload(generatedImageUrl, 'ai-masterpiece.png')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg backdrop-blur-sm"
+                size="lg"
+                data-testid="button-download-generated"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Save
+              </Button>
             </div>
-          )}
-        </div>
 
-        <div className="flex justify-between pt-4">
-          {drawingId && prompt && (
-            <Button 
-              onClick={handleDebugDownload} 
-              variant="outline" 
-              size="sm"
-              data-testid="button-debug-download"
-            >
-              Debug Response
-            </Button>
-          )}
-          <Button onClick={onClose} data-testid="button-close-generated" className="ml-auto">
-            <X className="w-4 h-4 mr-2" />
-            Stäng
-          </Button>
-        </div>
+            {/* Close Button */}
+            <div className="mt-8">
+              <Button 
+                onClick={onClose} 
+                variant="outline" 
+                size="lg" 
+                className="px-8"
+                data-testid="button-close-generated"
+              >
+                <X className="w-5 h-5 mr-2" />
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
+
       </DialogContent>
     </Dialog>
   );
