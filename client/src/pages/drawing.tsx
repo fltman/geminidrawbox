@@ -239,6 +239,7 @@ export default function DrawingPage() {
         generatedImageUrl={drawing.lastSavedDrawing?.generatedImagePath}
         prompt={drawing.lastSavedDrawing?.prompt}
         title={drawing.lastSavedDrawing?.title}
+        drawingId={drawing.lastSavedDrawing?.id}
       />
     </div>
   );

@@ -153,6 +153,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint - download full Gemini response as JSON file
+  app.post("/api/drawings/:id/debug-response", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { prompt } = req.body;
+
+      if (!prompt) {
+        return res.status(400).json({ error: "Prompt is required" });
+      }
+
+      // Get the drawing to fetch its image
+      const drawings = await storage.getAllDrawings();
+      const drawing = drawings.find(d => d.id === id);
+      
+      if (!drawing) {
+        return res.status(404).json({ error: "Drawing not found" });
+      }
+
+      // Get the original image from object storage
+      const objectStorageService = new ObjectStorageService();
+      const objectFile = await objectStorageService.getObjectEntityFile(drawing.imagePath);
+      
+      // Download the image data
+      const chunks: Buffer[] = [];
+      const stream = objectFile.createReadStream();
+      
+      await new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(chunk));
+        stream.on('end', resolve);
+        stream.on('error', reject);
+      });
+      
+      const imageBuffer = Buffer.concat(chunks);
+
+      // Generate new image using Gemini and get full response
+      const result = await generateImageFromDrawing(imageBuffer, prompt);
+      
+      // Return full response as downloadable JSON file
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `gemini-response-${timestamp}.json`;
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.json({
+        prompt: prompt,
+        timestamp: new Date().toISOString(),
+        success: result.success,
+        error: result.error,
+        imageDataSize: result.imageData ? result.imageData.length : 0,
+        fullResponse: result.fullResponse
+      });
+
+    } catch (error) {
+      console.error("Error in debug response:", error);
+      res.status(500).json({ 
+        error: "Failed to generate debug response",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Endpoint for serving private objects (like generated images)
   app.get("/objects/:objectPath(*)", async (req, res) => {
     const objectStorageService = new ObjectStorageService();

@@ -10,6 +10,7 @@ interface GeneratedImageModalProps {
   generatedImageUrl?: string;
   prompt?: string;
   title?: string;
+  drawingId?: string;
 }
 
 export default function GeneratedImageModal({ 
@@ -18,7 +19,8 @@ export default function GeneratedImageModal({
   originalImageUrl,
   generatedImageUrl,
   prompt,
-  title
+  title,
+  drawingId
 }: GeneratedImageModalProps) {
   const handleDownload = (imageUrl: string, filename: string) => {
     const link = document.createElement('a');
@@ -27,6 +29,32 @@ export default function GeneratedImageModal({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDebugDownload = async () => {
+    if (!drawingId || !prompt) return;
+    
+    try {
+      const response = await fetch(`/api/drawings/${drawingId}/debug-response`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `gemini-debug-${Date.now()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Failed to download debug response:', error);
+    }
   };
 
   return (
@@ -118,8 +146,18 @@ export default function GeneratedImageModal({
           )}
         </div>
 
-        <div className="flex justify-end pt-4">
-          <Button onClick={onClose} data-testid="button-close-generated">
+        <div className="flex justify-between pt-4">
+          {drawingId && prompt && (
+            <Button 
+              onClick={handleDebugDownload} 
+              variant="outline" 
+              size="sm"
+              data-testid="button-debug-download"
+            >
+              Debug Response
+            </Button>
+          )}
+          <Button onClick={onClose} data-testid="button-close-generated" className="ml-auto">
             <X className="w-4 h-4 mr-2" />
             Stäng
           </Button>
