@@ -35,11 +35,9 @@ export default function DrawingActions({
 
   return (
     <>
-      <div className="p-4 space-y-4">
-        <h3 className="text-sm font-medium text-muted-foreground">⚡ Actions</h3>
-        
+      <div className="p-4 space-y-3">
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -59,18 +57,16 @@ export default function DrawingActions({
           >
             <Redo className="w-4 h-4" />
           </Button>
-        </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={onClear}
-          data-testid="button-clear-canvas"
-        >
-          <Eraser className="w-4 h-4 mr-2" />
-          Clear
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClear}
+            data-testid="button-clear-canvas"
+          >
+            <Eraser className="w-4 h-4" />
+          </Button>
+        </div>
         
         {/* AI Generate Button */}
         <Button

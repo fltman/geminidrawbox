@@ -19,11 +19,10 @@ export default function DrawingPage() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar Toolbar */}
-      <div className="hidden md:flex flex-col w-80 bg-card border-r border-border shadow-sm overflow-y-auto">
+      <div className="hidden md:flex flex-col w-56 bg-card/50 border-r border-border/50 shadow-sm overflow-y-auto">
         {/* Toolbar Header */}
-        <div className="p-6 border-b border-border">
-          <h1 className="text-xl font-semibold text-foreground mb-2">Digital Rityta</h1>
-          <p className="text-sm text-muted-foreground">Välj verktyg och börja rita</p>
+        <div className="p-4 border-b border-border/50">
+          <h1 className="text-lg font-medium text-foreground">✨ AI Studio</h1>
         </div>
 
         {/* Brush Controls */}
