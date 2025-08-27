@@ -1,6 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface GeneratedImageModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ export default function GeneratedImageModal({
   drawingId,
   prompt
 }: GeneratedImageModalProps) {
+  const isMobile = useIsMobile();
 
   const handleDownload = (url: string, filename: string) => {
     const link = document.createElement('a');
@@ -86,39 +88,70 @@ export default function GeneratedImageModal({
         {/* Full Screen AI Image Display */}
         {generatedImageUrl && (
           <div className="relative w-full h-full flex flex-col items-center">
-            <img
-              src={generatedImageUrl}
-              alt="AI Generated Masterpiece"
-              className="w-full h-auto max-h-[85vh] object-contain rounded-2xl shadow-2xl"
-              data-testid="img-generated"
-            />
-            
-            {/* Download Button Overlay */}
-            <div className="absolute top-6 right-6">
-              <Button
-                onClick={() => handleDownload(generatedImageUrl, 'ai-masterpiece.png')}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg backdrop-blur-sm"
-                size="lg"
-                data-testid="button-download-generated"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Save
-              </Button>
+            <div className="relative">
+              <img
+                src={generatedImageUrl}
+                alt="AI Generated Masterpiece"
+                className="w-full h-auto max-h-[75vh] object-contain rounded-2xl shadow-2xl"
+                data-testid="img-generated"
+              />
+              
+              {/* Download Button Overlay - Desktop Only */}
+              {!isMobile && (
+                <div className="absolute top-6 right-6">
+                  <Button
+                    onClick={() => handleDownload(generatedImageUrl, 'ai-masterpiece.png')}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg backdrop-blur-sm"
+                    size="lg"
+                    data-testid="button-download-generated"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Save
+                  </Button>
+                </div>
+              )}
             </div>
 
-            {/* Close Button */}
-            <div className="mt-8">
-              <Button 
-                onClick={onClose} 
-                variant="outline" 
-                size="lg" 
-                className="px-8"
-                data-testid="button-close-generated"
-              >
-                <X className="w-5 h-5 mr-2" />
-                Close
-              </Button>
-            </div>
+            {/* Mobile Buttons Below Image */}
+            {isMobile && (
+              <div className="flex gap-4 mt-6 w-full px-4">
+                <Button
+                  onClick={() => handleDownload(generatedImageUrl, 'ai-masterpiece.png')}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  size="lg"
+                  data-testid="button-download-generated"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Save
+                </Button>
+                <Button 
+                  onClick={onClose} 
+                  variant="outline" 
+                  size="lg" 
+                  className="flex-1"
+                  data-testid="button-close-generated"
+                >
+                  <X className="w-5 h-5 mr-2" />
+                  Close
+                </Button>
+              </div>
+            )}
+
+            {/* Desktop Close Button */}
+            {!isMobile && (
+              <div className="mt-8">
+                <Button 
+                  onClick={onClose} 
+                  variant="outline" 
+                  size="lg" 
+                  className="px-8"
+                  data-testid="button-close-generated"
+                >
+                  <X className="w-5 h-5 mr-2" />
+                  Close
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
